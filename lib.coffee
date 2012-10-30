@@ -1,29 +1,3 @@
-class exports.Paragraph extends String
-    constructor: (__value__) ->
-        @length = (@__value__ = __value__ or "").length
-
-    toString: -> @__value__
-    valueOf: -> @__value__
-
-    toWordList: ->
-        this.split(/\s+/).filter((p)-> return p if p.length > 0)
-
-class exports.Word extends String
-    constructor: (__value__) ->
-        @length = (@__value__ = __value__ or "").length
-
-    toString: -> @__value__
-    valueOf: -> @__value__
-
-    truncatedAt: (maxLength)->
-        "#{@[0..(maxLength-2)]}-"
-
-    remainderAfter: (maxLength)->
-        @[(maxLength-1)..-1]
-
-
-
-
 class exports.Document
     constructor: (@text, @maxLength)->
         throw "Text should be a string" unless @text.constructor == String
@@ -33,7 +7,6 @@ class exports.Document
 
     makeParagraphs: ()->
         lines = @text.split(/\n/)
-        @paragraphs = (paragraph.toWordList() for paragraph in lines)
         @paragraphs = (new exports.Paragraph(paragraph).toWordList() for paragraph in lines)
 
     makeLines: ()->
@@ -47,7 +20,7 @@ class exports.Document
     addNextWordToLines: (nextWord)->
         while nextWord.length > @maxLength
             nextWord = new exports.Word(@chopUpLengthyWord(nextWord))
-        if @cantFit(nextWord)
+        unless nextWord.canFitOn(@currentLine, @maxLength)
             @addLine(@currentLine)
             @currentLine = new Array
         @currentLine.push(nextWord)
@@ -58,9 +31,35 @@ class exports.Document
 
     chopUpLengthyWord: (nextWord)->
         @addLine(@currentLine)
-        @currentLine = [nextWord.truncatedAt(@maxLength)]
+        @currentLine = [nextWord.truncateAt(@maxLength)]
         return nextWord.remainderAfter(@maxLength)
 
-    cantFit: (nextWord)->
-        @currentLine.join(' ').length + nextWord.length > @maxLength
+class exports.Paragraph extends String
+    constructor: (__value__) ->
+        @length = (@__value__ = __value__ or "").length
 
+    toString: -> @__value__
+    valueOf: -> @__value__
+
+    toWordList: ->
+        this.split(/\s+/).filter((p)-> return p if p.length > 0)
+
+
+class exports.Word extends String
+    constructor: (__value__) ->
+        @length = (@__value__ = __value__ or "").length
+
+    toString: -> @__value__
+    valueOf: -> @__value__
+
+    truncateAt: (maxLength)->
+        "#{@[0..(maxLength-2)]}-"
+
+    remainderAfter: (maxLength)->
+        @[(maxLength-1)..-1] 
+
+    canFitOn: (line, maxLength)->
+        lengthOfNewLineAsString = "#{line.join(' ')} #{this}".length
+        #subtract one if the line is empty
+        lengthOfNewLineAsString -= 1 if line.length == 0
+        not (lengthOfNewLineAsString > maxLength) 
