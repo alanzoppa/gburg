@@ -1,11 +1,20 @@
 String::toWordList = ->
     return this.split(/\s+/).filter((p)-> return p if p.length > 0)
 
-String::truncatedAt = (maxLength)->
-    "#{this[0..(maxLength-2)]}-"
 
-String::remainderAfter = (maxLength)->
-    this[(maxLength-1)..-1]
+class exports.Word extends String
+    constructor: (__value__) ->
+        @length = (@__value__ = __value__ or "").length
+
+    toString: -> @__value__
+    valueOf: -> @__value__
+
+    truncatedAt: (maxLength)->
+        "#{@[0..(maxLength-2)]}-"
+
+    remainderAfter: (maxLength)->
+        @[(maxLength-1)..-1]
+
 
 
 
@@ -24,13 +33,13 @@ class exports.Document
         for paragraph in @paragraphs
             @currentLine = new Array
             while paragraph.length
-                nextWord = paragraph.shift()
+                nextWord = new exports.Word(paragraph.shift())
                 @addNextWordToLines(nextWord)
                 @addLine(@currentLine.join(' ')) unless paragraph.length 
 
     addNextWordToLines: (nextWord)->
         while nextWord.length > @maxLength
-            nextWord = @chopUpLengthyWord(nextWord)
+            nextWord = new exports.Word(@chopUpLengthyWord(nextWord))
         if @cantFit(nextWord)
             @addLine(@currentLine)
             @currentLine = new Array

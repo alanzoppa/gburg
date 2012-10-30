@@ -42,15 +42,18 @@ describe "Document", ->
             document.lines[i].should.equal(expectedArrayOutput[i])
 
     it "should be able to truncate words", ->
-        "abcdefghijklmnop".truncatedAt(10).should.equal("abcdefghi-")
-        "abcdefghijklmnop".truncatedAt(9).should.equal("abcdefgh-")
+        word = new lib.Word("abcdefghijklmnop")
+        word.truncatedAt(10).should.equal("abcdefghi-")
+        word.truncatedAt(9).should.equal("abcdefgh-")
 
     it "should be able to get the remainder of a word", ->
-        "abcdefghijklmnop".remainderAfter(10).should.equal("jklmnop")
-        "abcdefghijklmnop".remainderAfter(3).should.equal("cdefghijklmnop")
+        word = new lib.Word("abcdefghijklmnop")
+        word.remainderAfter(10).should.equal("jklmnop")
+        word.remainderAfter(3).should.equal("cdefghijklmnop")
 
     it "should split the entire word", ->
         for string in ["abcdefghijklmnop", "herpaderp", "foobarfoobarfoobar", "anyrandomstring"]
-            a = string.truncatedAt(5)
-            b = string.remainderAfter(5)
+            word = new lib.Word(string)
+            a = word.truncatedAt(5)
+            b = word.remainderAfter(5)
             [a.replace(/-$/, ''),b].join('').should.equal(string)
