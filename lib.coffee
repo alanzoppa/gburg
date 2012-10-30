@@ -1,6 +1,12 @@
-String::toWordList = ->
-    return this.split(/\s+/).filter((p)-> return p if p.length > 0)
+class exports.Paragraph extends String
+    constructor: (__value__) ->
+        @length = (@__value__ = __value__ or "").length
 
+    toString: -> @__value__
+    valueOf: -> @__value__
+
+    toWordList: ->
+        this.split(/\s+/).filter((p)-> return p if p.length > 0)
 
 class exports.Word extends String
     constructor: (__value__) ->
@@ -28,6 +34,7 @@ class exports.Document
     makeParagraphs: ()->
         lines = @text.split(/\n/)
         @paragraphs = (paragraph.toWordList() for paragraph in lines)
+        @paragraphs = (new exports.Paragraph(paragraph).toWordList() for paragraph in lines)
 
     makeLines: ()->
         for paragraph in @paragraphs
